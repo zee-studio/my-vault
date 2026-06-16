@@ -3,54 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Password Manager</title>
+    <title>ZEE STUDIO - Secure Vault</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        /* ZEE STUDIO Custom Orange Gradient & Glow Effect */
+        .zee-gradient {
+            background: linear-gradient(135deg, #FF4500 0%, #FF8C00 100%);
+        }
+        .zee-text-gradient {
+            background: linear-gradient(135deg, #FF4500, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .zee-border-glow {
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans p-4">
+<body class="bg-[#0b0c10] text-slate-200 font-sans p-4 min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-md mx-auto bg-slate-800 p-6 rounded-2xl shadow-xl mt-10">
-        <h2 class="text-2xl font-bold mb-6 text-center text-emerald-400">🔐 My Vault</h2>
+    <div class="max-w-md mx-auto w-full bg-[#12141c] p-6 rounded-2xl shadow-2xl mt-6 border border-slate-800/80">
+        <div class="flex items-center justify-center space-x-2 mb-8">
+            <span class="text-2xl font-black tracking-wider text-white">ZEE <span class="text-orange-500">STUDIO</span></span>
+        </div>
 
         <div id="auth-section" class="space-y-4">
-            <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded bg-slate-700 border border-slate-600 focus:outline-none focus:border-emerald-500">
-            <input type="password" id="password" placeholder="Firebase Password" class="w-full p-3 rounded bg-slate-700 border border-slate-600 focus:outline-none focus:border-emerald-500">
-            <button onclick="login()" class="w-full bg-emerald-500 hover:bg-emerald-600 p-3 rounded font-bold cursor-pointer transition">Login</button>
+            <div class="text-center mb-4">
+                <p class="text-xs text-orange-400 font-bold tracking-widest uppercase">✨ Premium Secure Vault</p>
+            </div>
+            <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
+            <input type="password" id="password" placeholder="Firebase Password" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
+            <button onclick="login()" class="w-full zee-gradient text-white p-3 rounded-xl font-bold cursor-pointer transition hover:opacity-90 shadow-lg shadow-orange-600/20 text-sm">Login to Vault</button>
         </div>
 
         <div id="vault-section" class="hidden space-y-6">
-            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                <span id="user-email" class="text-sm text-slate-400"></span>
-                <button onclick="logout()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded">Logout</button>
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="user-email" class="text-xs text-slate-400 font-mono"></span>
+                </div>
+                <button onclick="logout()" class="text-xs bg-red-950/40 text-red-400 border border-red-900/50 hover:bg-red-900/30 px-3 py-1 rounded-lg transition">Logout</button>
             </div>
 
-            <div class="bg-amber-950/40 p-3 rounded border border-amber-500/30">
-                <label class="text-xs text-amber-400 font-bold block mb-1">SECRET MASTER KEY (စာဝှက်ရန်/ဖြေရန်):</label>
-                <input type="password" id="master-key" placeholder="ဒီ Key ကို လုံးဝမမေ့ပါနဲ့ (DB ထဲမသိမ်းပါ)" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 focus:outline-none">
+            <div class="bg-orange-950/20 p-3 rounded-xl border border-orange-500/20">
+                <label class="text-[11px] text-orange-400 font-bold block mb-1 tracking-wider">SECRET MASTER KEY (စာဝှက်ရန်/ဖြေရန်):</label>
+                <input type="password" id="master-key" placeholder="ဒီ Key ကို လုံးဝမမေ့ပါနဲ့" class="w-full p-2 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500 font-mono text-orange-300">
             </div>
 
-            <div class="space-y-3 bg-slate-700/50 p-4 rounded-xl">
-                <h3 class="text-sm font-bold text-slate-300">Add New Password</h3>
-                <input type="text" id="site-name" placeholder="Website / App နာမည် (ဥပမာ- Facebook)" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600">
-                <input type="text" id="site-username" placeholder="Username / Email" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600">
-                <input type="password" id="site-password" placeholder="Password" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600">
-                <button onclick="savePassword()" class="w-full bg-blue-500 hover:bg-blue-600 p-2 text-sm rounded font-bold transition">Save Encrypted</button>
+            <div class="space-y-3 bg-[#161924] p-4 rounded-xl border border-slate-800/60">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Add New Entry</h3>
+                <input type="text" id="site-name" placeholder="Website / App နာမည် (ဥပမာ- Facebook)" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
+                <input type="text" id="site-username" placeholder="Username / Email" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
+                <input type="password" id="site-password" placeholder="Password" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
+                <button onclick="savePassword()" class="w-full zee-gradient text-white p-2.5 text-sm rounded-lg font-bold transition hover:opacity-90 cursor-pointer">Save Encrypted Data</button>
             </div>
 
             <div>
-                <h3 class="text-md font-bold mb-3 text-emerald-400">Your Saved Logins</h3>
+                <h3 class="text-sm font-bold mb-3 text-orange-400 tracking-wider uppercase">Your Vault Entries</h3>
                 <div id="password-list" class="space-y-3">
                     </div>
             </div>
         </div>
     </div>
 
+    <div class="text-center text-[11px] text-slate-600 mt-8 mb-2">
+        &copy; 2026 ZEE STUDIO. All Rights Reserved.
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // သင့်ရဲ့ Firebase Web App Config ကို နေရာချထားပြီးပါပြီ
+        // သင့်ရဲ့ Firebase Config ကို အသေထားရှိပါတယ်
         const firebaseConfig = {
             apiKey: "AIzaSyBPrHFMmskVVnh7Ne_n2VhaQEvLyGLRZoM",
             authDomain: "zee-manager.firebaseapp.com",
@@ -105,7 +132,6 @@
             if (!masterKey) return alert("ကျေးဇူးပြု၍ Master Key အရင်ရိုက်ထည့်ပါ!");
             if (!site || !username || !pass) return alert("အချက်အလက် အကုန်ဖြည့်ပါ");
 
-            // Client-side Encryption (AES-256)
             const encryptedPassword = CryptoJS.AES.encrypt(pass, masterKey).toString();
 
             try {
@@ -113,15 +139,13 @@
                     userId: currentUser.uid,
                     site: site,
                     username: username,
-                    password: encryptedPassword, // ကုဒ်ဝှက်ထားသော စာသားကိုသာ သိမ်းမည်
+                    password: encryptedPassword,
                     createdAt: new Date()
                 });
                 
-                // Clear Form
                 document.getElementById('site-name').value = '';
                 document.getElementById('site-username').value = '';
                 document.getElementById('site-password').value = '';
-                alert("လုံခြုံစွာ သိမ်းဆည်းပြီးပါပြီ။");
             } catch (error) {
                 alert("Error saving: " + error.message);
             }
@@ -134,22 +158,40 @@
                 const listDiv = document.getElementById('password-list');
                 listDiv.innerHTML = '';
                 
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
+                snapshot.forEach((snapshotDoc) => {
+                    const data = snapshotDoc.data();
+                    const docId = snapshotDoc.id;
                     
                     const itemHTML = `
-                        <div class="p-3 bg-slate-700/40 border border-slate-700 rounded-lg space-y-1">
-                            <div class="font-bold text-emerald-400">${data.site}</div>
-                            <div class="text-xs text-slate-300">User: ${data.username}</div>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <input type="password" value="${data.password}" id="p-${doc.id}" readonly class="bg-transparent text-xs text-slate-400 w-full focus:outline-none">
-                                <button onclick="decryptField('${doc.id}', '${data.password}')" class="text-xs text-blue-400 font-bold hover:underline cursor-pointer">ပြရန်</button>
+                        <div class="p-3 bg-[#161924] border border-slate-800/80 rounded-xl space-y-1 zee-border-glow position-relative">
+                            <div class="flex justify-between items-start">
+                                <div class="font-bold text-orange-400 text-sm">${data.site}</div>
+                                <button onclick="deleteEntry('${docId}', '${data.site}')" class="text-xs text-red-500/70 hover:text-red-400 cursor-pointer p-1 transition">
+                                    ဖျက်ရန်
+                                </button>
+                            </div>
+                            <div class="text-xs text-slate-400">User: ${data.username}</div>
+                            <div class="flex items-center space-x-2 mt-1 bg-[#10121a] p-1.5 rounded-lg border border-slate-800">
+                                <input type="password" value="${data.password}" id="p-${docId}" readonly class="bg-transparent text-xs text-slate-500 w-full focus:outline-none font-mono tracking-wide">
+                                <button onclick="decryptField('${docId}', '${data.password}')" class="text-xs text-orange-500 font-bold hover:underline cursor-pointer whitespace-nowrap px-1">ပြရန်</button>
                             </div>
                         </div>
                     `;
                     listDiv.insertAdjacentHTML('beforeend', itemHTML);
                 });
             });
+        }
+
+        // 🗑️ Delete Function (နှစ်ခါတင်မိတာတွေကို ပြန်ဖျက်ဖို့)
+        window.deleteEntry = async function(id, siteName) {
+            if (confirm(`"${siteName}" အတွက် သိမ်းထားတာကို ဖျက်ပစ်ဖို့ သေချာပါသလား?`)) {
+                try {
+                    await deleteDoc(doc(db, "passwords", id));
+                    alert("ဖျက်သိမ်းပြီးပါပြီ။");
+                } catch (error) {
+                    alert("ဖျက်လို့မရပါ: " + error.message);
+                }
+            }
         }
 
         // Decrypt individual password
@@ -167,13 +209,13 @@
                 if (inputField.type === "password") {
                     inputField.type = "text";
                     inputField.value = originalText;
-                    inputField.classList.remove('text-slate-400');
+                    inputField.classList.remove('text-slate-500');
                     inputField.classList.add('text-amber-400', 'font-bold');
                 } else {
                     inputField.type = "password";
                     inputField.value = cipherText;
                     inputField.classList.remove('text-amber-400', 'font-bold');
-                    inputField.classList.add('text-slate-400');
+                    inputField.classList.add('text-slate-500');
                 }
             } catch (e) {
                 alert("Master Key မှားနေပါတယ်။ စာသားကို ကုဒ်ပြန်ဖြေလို့ မရပါ!");
