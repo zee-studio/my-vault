@@ -7,22 +7,20 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        /* ZEE STUDIO Custom Orange Gradient & Glow Effect */
         .zee-gradient {
             background: linear-gradient(135deg, #FF4500 0%, #FF8C00 100%);
         }
-        .zee-text-gradient {
-            background: linear-gradient(135deg, #FF4500, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
         .zee-border-glow {
-            border: 1px solid rgba(255, 69, 0, 0.3);
-            box-shadow: 0 0 15px rgba(255, 69, 0, 0.1);
+            border: 1px solid rgba(255, 69, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.05);
+        }
+        .popup-overlay {
+            background-color: rgba(5, 6, 9, 0.85);
+            backdrop-filter: blur(6px);
         }
     </style>
 </head>
-<body class="bg-[#0b0c10] text-slate-200 font-sans p-4 min-h-screen flex flex-col justify-between">
+<body class="bg-[#0b0c10] text-slate-200 font-sans p-4 min-h-screen flex flex-col justify-between relative">
 
     <div class="max-w-md mx-auto w-full bg-[#12141c] p-6 rounded-2xl shadow-2xl mt-6 border border-slate-800/80">
         <div class="flex items-center justify-center space-x-2 mb-8">
@@ -62,8 +60,24 @@
 
             <div>
                 <h3 class="text-sm font-bold mb-3 text-orange-400 tracking-wider uppercase">Your Vault Entries</h3>
-                <div id="password-list" class="space-y-3">
-                    </div>
+                <div id="password-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-popup" class="fixed inset-0 popup-overlay flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-[#12141c] w-full max-w-sm rounded-2xl p-6 border border-red-500/30 shadow-2xl space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-red-950/50 text-red-500 border border-red-500/30 rounded-full flex items-center justify-center mx-auto text-xl font-bold mb-3">⚠️</div>
+                <h4 class="text-md font-bold text-white">သိမ်းထားတာကို ဖျက်ပစ်ဖို့ သေချာပါသလား?</h4>
+                <p class="text-xs text-slate-400 mt-1">အောက်ပါ ကွက်လပ်တွင် အတည်ပြုရန် <span id="confirm-site-name" class="text-orange-400 font-bold"></span> ဟု ရိုက်ထည့်ပေးပါ။</p>
+            </div>
+            
+            <input type="text" id="delete-confirm-input" placeholder="ဒီနေရာမှာ နာမည်ပြန်ရိုက်ထည့်ပါ" class="w-full p-2.5 text-center text-sm rounded-xl bg-[#1a1d29] border border-slate-700 focus:outline-none focus:border-red-500 font-mono text-white">
+            
+            <div class="flex space-x-3 text-sm font-bold pt-2">
+                <button onclick="closeDeletePopup()" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl cursor-pointer transition">မဖျက်တော့ပါ</button>
+                <button onclick="executeDelete()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-xl cursor-pointer transition shadow-lg shadow-red-700/20">သေချာပါတယ် ဖျက်မည်</button>
             </div>
         </div>
     </div>
@@ -77,7 +91,6 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // သင့်ရဲ့ Firebase Config ကို အသေထားရှိပါတယ်
         const firebaseConfig = {
             apiKey: "AIzaSyBPrHFMmskVVnh7Ne_n2VhaQEvLyGLRZoM",
             authDomain: "zee-manager.firebaseapp.com",
@@ -94,8 +107,9 @@
         const db = getFirestore(app);
 
         let currentUser = null;
+        let pendingDeleteId = null;
+        let pendingDeleteSite = null;
 
-        // Auth State Listener
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -110,19 +124,16 @@
             }
         });
 
-        // Login Function
         window.login = function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             signInWithEmailAndPassword(auth, email, password).catch(err => alert("Login မှားနေပါတယ်: " + err.message));
         }
 
-        // Logout Function
         window.logout = function() {
             signOut(auth);
         }
 
-        // Save & Encrypt Password
         window.savePassword = async function() {
             const masterKey = document.getElementById('master-key').value;
             const site = document.getElementById('site-name').value;
@@ -142,7 +153,6 @@
                     password: encryptedPassword,
                     createdAt: new Date()
                 });
-                
                 document.getElementById('site-name').value = '';
                 document.getElementById('site-username').value = '';
                 document.getElementById('site-password').value = '';
@@ -151,7 +161,6 @@
             }
         }
 
-        // Load & Decrypt Passwords
         function loadPasswords() {
             const q = query(collection(db, "passwords"), where("userId", "==", currentUser.uid));
             onSnapshot(q, (snapshot) => {
@@ -163,12 +172,10 @@
                     const docId = snapshotDoc.id;
                     
                     const itemHTML = `
-                        <div class="p-3 bg-[#161924] border border-slate-800/80 rounded-xl space-y-1 zee-border-glow position-relative">
+                        <div class="p-3 bg-[#161924] border border-slate-800/80 rounded-xl space-y-1 zee-border-glow">
                             <div class="flex justify-between items-start">
                                 <div class="font-bold text-orange-400 text-sm">${data.site}</div>
-                                <button onclick="deleteEntry('${docId}', '${data.site}')" class="text-xs text-red-500/70 hover:text-red-400 cursor-pointer p-1 transition">
-                                    ဖျက်ရန်
-                                </button>
+                                <button onclick="openDeletePopup('${docId}', '${data.site}')" class="text-xs text-red-500/70 hover:text-red-400 cursor-pointer p-1 transition">ဖျက်ရန်</button>
                             </div>
                             <div class="text-xs text-slate-400">User: ${data.username}</div>
                             <div class="flex items-center space-x-2 mt-1 bg-[#10121a] p-1.5 rounded-lg border border-slate-800">
@@ -182,19 +189,39 @@
             });
         }
 
-        // 🗑️ Delete Function (နှစ်ခါတင်မိတာတွေကို ပြန်ဖျက်ဖို့)
-        window.deleteEntry = async function(id, siteName) {
-            if (confirm(`"${siteName}" အတွက် သိမ်းထားတာကို ဖျက်ပစ်ဖို့ သေချာပါသလား?`)) {
-                try {
-                    await deleteDoc(doc(db, "passwords", id));
-                    alert("ဖျက်သိမ်းပြီးပါပြီ။");
-                } catch (error) {
-                    alert("ဖျက်လို့မရပါ: " + error.message);
-                }
+        // 🎨 Popup အလှလေးကို ဖွင့်ပေးမည့် Function
+        window.openDeletePopup = function(id, siteName) {
+            pendingDeleteId = id;
+            pendingDeleteSite = siteName;
+            document.getElementById('confirm-site-name').innerText = `"${siteName}"`;
+            document.getElementById('delete-confirm-input').value = '';
+            document.getElementById('delete-popup').classList.remove('hidden');
+        }
+
+        // Popup ပြန်ပိတ်ရန်
+        window.closeDeletePopup = function() {
+            document.getElementById('delete-popup').classList.add('hidden');
+            pendingDeleteId = null;
+            pendingDeleteSite = null;
+        }
+
+        // 🗑️ သေချာပြီဆိုမှ အမှန်တကယ် ဖျက်မည့် Function
+        window.executeDelete = async function() {
+            const userInput = document.getElementById('delete-confirm-input').value.trim();
+            
+            if (userInput !== pendingDeleteSite) {
+                alert("ရိုက်ထည့်လိုက်တဲ့ နာမည်မတူပါဘူး။ ကျေးဇူးပြု၍ မှန်ကန်အောင် ပြန်ရိုက်ထည့်ပါ။");
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, "passwords", pendingDeleteId));
+                closeDeletePopup();
+            } catch (error) {
+                alert("ဖျက်လို့မရပါ: " + error.message);
             }
         }
 
-        // Decrypt individual password
         window.decryptField = function(id, cipherText) {
             const masterKey = document.getElementById('master-key').value;
             if (!masterKey) return alert("စာပြန်ဖြေဖို့ Master Key ရိုက်ထည့်ပေးရန် လိုအပ်ပါတယ်။");
@@ -202,7 +229,6 @@
             try {
                 const bytes = CryptoJS.AES.decrypt(cipherText, masterKey);
                 const originalText = bytes.toString(CryptoJS.enc.Utf8);
-                
                 if (!originalText) throw new Error();
                 
                 const inputField = document.getElementById(`p-${id}`);
