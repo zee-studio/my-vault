@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Password Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body class="bg-slate-900 text-white font-sans p-4">
+
+    <div class="max-w-md mx-auto bg-slate-800 p-6 rounded-2xl shadow-xl mt-10">
+        <h2 class="text-2xl font-bold mb-6 text-center text-emerald-400">🔐 My Vault</h2>
+
+        <div id="auth-section" class="space-y-4">
+            <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded bg-slate-700 border border-slate-600 focus:outline-none focus:border-emerald-500">
+            <input type="password" id="password" placeholder="Firebase Password" class="w-full p-3 rounded bg-slate-700 border border-slate-600 focus:outline-none focus:border-emerald-500">
+            <button onclick="login()" class="w-full bg-emerald-500 hover:bg-emerald-600 p-3 rounded font-bold cursor-pointer transition">Login</button>
+        </div>
+
+        <div id="vault-section" class="hidden space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <span id="user-email" class="text-sm text-slate-400"></span>
+                <button onclick="logout()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded">Logout</button>
+            </div>
+
+            <div class="bg-amber-950/40 p-3 rounded border border-amber-500/30">
+                <label class="text-xs text-amber-400 font-bold block mb-1">SECRET MASTER KEY (စာဝှက်ရန်/ဖြေရန်):</label>
+                <input type="password" id="master-key" placeholder="ဒီ Key ကို လုံးဝမမေ့ပါနဲ့ (DB ထဲမသိမ်းပါ)" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600 focus:outline-none">
+            </div>
+
+            <div class="space-y-3 bg-slate-700/50 p-4 rounded-xl">
+                <h3 class="text-sm font-bold text-slate-300">Add New Password</h3>
+                <input type="text" id="site-name" placeholder="Website / App နာမည် (ဥပမာ- Facebook)" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600">
+                <input type="text" id="site-username" placeholder="Username / Email" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600">
+                <input type="password" id="site-password" placeholder="Password" class="w-full p-2 text-sm rounded bg-slate-700 border border-slate-600">
+                <button onclick="savePassword()" class="w-full bg-blue-500 hover:bg-blue-600 p-2 text-sm rounded font-bold transition">Save Encrypted</button>
+            </div>
+
+            <div>
+                <h3 class="text-md font-bold mb-3 text-emerald-400">Your Saved Logins</h3>
+                <div id="password-list" class="space-y-3">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // သင့်ရဲ့ Firebase Web App Config ကို နေရာချထားပြီးပါပြီ
+        const firebaseConfig = {
+            apiKey: "AIzaSyBPrHFMmskVVnh7Ne_n2VhaQEvLyGLRZoM",
+            authDomain: "zee-manager.firebaseapp.com",
+            databaseURL: "https://zee-manager-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "zee-manager",
+            storageBucket: "zee-manager.firebasestorage.app",
+            messagingSenderId: "724480690240",
+            appId: "1:724480690240:web:99c98c1707b4943d33f7a5",
+            measurementId: "G-NREE70D9XQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // Auth State Listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('vault-section').classList.remove('hidden');
+                document.getElementById('user-email').innerText = user.email;
+                loadPasswords();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('vault-section').classList.add('hidden');
+            }
+        });
+
+        // Login Function
+        window.login = function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password).catch(err => alert("Login မှားနေပါတယ်: " + err.message));
+        }
+
+        // Logout Function
+        window.logout = function() {
+            signOut(auth);
+        }
+
+        // Save & Encrypt Password
+        window.savePassword = async function() {
+            const masterKey = document.getElementById('master-key').value;
+            const site = document.getElementById('site-name').value;
+            const username = document.getElementById('site-username').value;
+            const pass = document.getElementById('site-password').value;
+
+            if (!masterKey) return alert("ကျေးဇူးပြု၍ Master Key အရင်ရိုက်ထည့်ပါ!");
+            if (!site || !username || !pass) return alert("အချက်အလက် အကုန်ဖြည့်ပါ");
+
+            // Client-side Encryption (AES-256)
+            const encryptedPassword = CryptoJS.AES.encrypt(pass, masterKey).toString();
+
+            try {
+                await addDoc(collection(db, "passwords"), {
+                    userId: currentUser.uid,
+                    site: site,
+                    username: username,
+                    password: encryptedPassword, // ကုဒ်ဝှက်ထားသော စာသားကိုသာ သိမ်းမည်
+                    createdAt: new Date()
+                });
+                
+                // Clear Form
+                document.getElementById('site-name').value = '';
+                document.getElementById('site-username').value = '';
+                document.getElementById('site-password').value = '';
+                alert("လုံခြုံစွာ သိမ်းဆည်းပြီးပါပြီ။");
+            } catch (error) {
+                alert("Error saving: " + error.message);
+            }
+        }
+
+        // Load & Decrypt Passwords
+        function loadPasswords() {
+            const q = query(collection(db, "passwords"), where("userId", "==", currentUser.uid));
+            onSnapshot(q, (snapshot) => {
+                const listDiv = document.getElementById('password-list');
+                listDiv.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    const itemHTML = `
+                        <div class="p-3 bg-slate-700/40 border border-slate-700 rounded-lg space-y-1">
+                            <div class="font-bold text-emerald-400">${data.site}</div>
+                            <div class="text-xs text-slate-300">User: ${data.username}</div>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <input type="password" value="${data.password}" id="p-${doc.id}" readonly class="bg-transparent text-xs text-slate-400 w-full focus:outline-none">
+                                <button onclick="decryptField('${doc.id}', '${data.password}')" class="text-xs text-blue-400 font-bold hover:underline cursor-pointer">ပြရန်</button>
+                            </div>
+                        </div>
+                    `;
+                    listDiv.insertAdjacentHTML('beforeend', itemHTML);
+                });
+            });
+        }
+
+        // Decrypt individual password
+        window.decryptField = function(id, cipherText) {
+            const masterKey = document.getElementById('master-key').value;
+            if (!masterKey) return alert("စာပြန်ဖြေဖို့ Master Key ရိုက်ထည့်ပေးရန် လိုအပ်ပါတယ်။");
+
+            try {
+                const bytes = CryptoJS.AES.decrypt(cipherText, masterKey);
+                const originalText = bytes.toString(CryptoJS.enc.Utf8);
+                
+                if (!originalText) throw new Error();
+                
+                const inputField = document.getElementById(`p-${id}`);
+                if (inputField.type === "password") {
+                    inputField.type = "text";
+                    inputField.value = originalText;
+                    inputField.classList.remove('text-slate-400');
+                    inputField.classList.add('text-amber-400', 'font-bold');
+                } else {
+                    inputField.type = "password";
+                    inputField.value = cipherText;
+                    inputField.classList.remove('text-amber-400', 'font-bold');
+                    inputField.classList.add('text-slate-400');
+                }
+            } catch (e) {
+                alert("Master Key မှားနေပါတယ်။ စာသားကို ကုဒ်ပြန်ဖြေလို့ မရပါ!");
+            }
+        }
+    </script>
+</body>
+</html>
