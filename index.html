@@ -15,28 +15,50 @@
             box-shadow: 0 0 15px rgba(255, 69, 0, 0.05);
         }
         .popup-overlay {
-            background-color: rgba(5, 6, 9, 0.85);
-            backdrop-filter: blur(6px);
+            background-color: rgba(5, 6, 9, 0.9);
+            backdrop-filter: blur(8px);
         }
     </style>
 </head>
 <body class="bg-[#0b0c10] text-slate-200 font-sans p-4 min-h-screen flex flex-col justify-between relative">
 
-    <div class="max-w-md mx-auto w-full bg-[#12141c] p-6 rounded-2xl shadow-2xl mt-6 border border-slate-800/80">
+    <div class="max-w-md mx-auto w-full bg-[#12141c] p-5 sm:p-8 rounded-2xl shadow-2xl mt-6 sm:mt-12 border border-slate-800/80 transition-all duration-300">
+        
         <div class="flex items-center justify-center space-x-2 mb-8">
-            <span class="text-2xl font-black tracking-wider text-white">ZEE <span class="text-orange-500">STUDIO</span></span>
+            <span class="text-2xl sm:text-3xl font-black tracking-wider text-white">ZEE <span class="text-orange-500">STUDIO</span></span>
         </div>
 
-        <div id="auth-section" class="space-y-4">
-            <div class="text-center mb-4">
+        <div id="auth-section" class="space-y-5">
+            <div class="text-center mb-2">
                 <p class="text-xs text-orange-400 font-bold tracking-widest uppercase">✨ Premium Secure Vault</p>
             </div>
-            <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
-            <input type="password" id="password" placeholder="Firebase Password" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
-            <button onclick="login()" class="w-full zee-gradient text-white p-3 rounded-xl font-bold cursor-pointer transition hover:opacity-90 shadow-lg shadow-orange-600/20 text-sm">Login to Vault</button>
+            <div class="space-y-1">
+                <label class="text-[11px] text-slate-400 uppercase tracking-wider pl-1">Enter Master Password:</label>
+                <input type="password" id="password" placeholder="••••••••" class="w-full p-3.5 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm tracking-widest transition text-white">
+            </div>
+            <button onclick="login()" class="w-full zee-gradient text-white p-3.5 rounded-xl font-bold cursor-pointer transition hover:opacity-90 shadow-lg shadow-orange-600/20 text-sm tracking-wide">Unlock Vault</button>
         </div>
 
-        <div id="vault-section" class="hidden space-y-6">
+        <div id="otp-section" class="hidden space-y-5">
+            <div class="p-4 bg-emerald-950/30 border border-emerald-500/30 rounded-xl flex items-center space-x-3">
+                <span class="text-xl">✅</span>
+                <div>
+                    <h5 class="text-sm font-bold text-emerald-400">အကောင့်အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ။</h5>
+                    <p class="text-[11px] text-slate-400">လုံခြုံရေးအတွက် ဒုတိယအဆင့် ကုဒ်ရိုက်ထည့်ပေးပါ။</p>
+                </div>
+            </div>
+
+            <div class="bg-[#161924] p-5 rounded-xl border border-slate-800 space-y-4">
+                <div class="text-center">
+                    <label class="text-xs text-orange-400 font-bold tracking-wider block mb-1">SECURITY OTP CODE (၆ လုံး):</label>
+                    <p class="text-[10px] text-slate-500 mb-3">ကုဒ် ၆ လုံးအား အောက်ပါကွက်လပ်တွင် အတည်ပြုပေးပါ။</p>
+                </div>
+                <input type="text" id="otp-input" maxlength="6" placeholder="0 0 0 0 0 0" class="w-full p-3 text-center text-lg rounded-xl bg-[#1a1d29] border border-slate-700 focus:outline-none focus:border-orange-500 font-mono tracking-[0.5em] font-bold text-white">
+                <button onclick="verifyOTP()" class="w-full zee-gradient text-white p-3 rounded-xl font-bold text-sm cursor-pointer transition hover:opacity-90">Verify & Open</button>
+            </div>
+        </div>
+
+        <div id="vault-section" class="hidden space-y-6 animate-fade-in">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <div class="flex items-center space-x-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -72,9 +94,7 @@
                 <h4 class="text-md font-bold text-white">သိမ်းထားတာကို ဖျက်ပစ်ဖို့ သေချာပါသလား?</h4>
                 <p class="text-xs text-slate-400 mt-1">အောက်ပါ ကွက်လပ်တွင် အတည်ပြုရန် <span id="confirm-site-name" class="text-orange-400 font-bold"></span> ဟု ရိုက်ထည့်ပေးပါ။</p>
             </div>
-            
             <input type="text" id="delete-confirm-input" placeholder="ဒီနေရာမှာ နာမည်ပြန်ရိုက်ထည့်ပါ" class="w-full p-2.5 text-center text-sm rounded-xl bg-[#1a1d29] border border-slate-700 focus:outline-none focus:border-red-500 font-mono text-white">
-            
             <div class="flex space-x-3 text-sm font-bold pt-2">
                 <button onclick="closeDeletePopup()" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl cursor-pointer transition">မဖျက်တော့ပါ</button>
                 <button onclick="executeDelete()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-xl cursor-pointer transition shadow-lg shadow-red-700/20">သေချာပါတယ် ဖျက်မည်</button>
@@ -106,7 +126,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // ⚠️ [ပြင်ဆင်ရန်] သင့် Firebase က အကောင့် Email ကို ဒီနေရာမှာ တစ်ခါတည်း အသေထည့်ပေးထားပါတယ်
+        const MY_EMAIL = "zee-studio@gmail.com"; 
+
+        // ⚠️ [ပြင်ဆင်ရန်] ဒုတိယအဆင့် အတည်ပြုမယ့် Code ၆ လုံးကို ဒီမှာ စိတ်ကြိုက် ပြောင်းနိုင်ပါတယ်
+        const SECRET_OTP_CODE = "764182"; 
+
         let currentUser = null;
+        let isOtpVerified = false;
         let pendingDeleteId = null;
         let pendingDeleteSite = null;
 
@@ -114,20 +141,45 @@
             if (user) {
                 currentUser = user;
                 document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('vault-section').classList.remove('hidden');
-                document.getElementById('user-email').innerText = user.email;
-                loadPasswords();
+                
+                if (isOtpVerified) {
+                    showVault();
+                } else {
+                    document.getElementById('otp-section').classList.remove('hidden');
+                }
             } else {
                 currentUser = null;
+                isOtpVerified = false;
                 document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('otp-section').classList.add('hidden');
                 document.getElementById('vault-section').classList.add('hidden');
             }
         });
 
+        // Login Function (Using fixed email + user password input)
         window.login = function() {
-            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, password).catch(err => alert("Login မှားနေပါတယ်: " + err.message));
+            if (!password) return alert("Password ထည့်ပေးပါဦး။");
+            
+            signInWithEmailAndPassword(auth, MY_EMAIL, password).catch(err => alert("Password မှားယွင်းနေပါတယ်!"));
+        }
+
+        // OTP Verification Function
+        window.verifyOTP = function() {
+            const typedOTP = document.getElementById('otp-input').value.trim();
+            if (typedOTP === SECRET_OTP_CODE) {
+                isOtpVerified = true;
+                showVault();
+            } else {
+                alert("Security Code (OTP) မမှန်ကန်ပါ။ ပြန်လည် ကြိုးစားပါ။");
+            }
+        }
+
+        function showVault() {
+            document.getElementById('otp-section').classList.add('hidden');
+            document.getElementById('vault-section').classList.remove('hidden');
+            document.getElementById('user-email').innerText = currentUser.email;
+            loadPasswords();
         }
 
         window.logout = function() {
@@ -189,7 +241,6 @@
             });
         }
 
-        // 🎨 Popup အလှလေးကို ဖွင့်ပေးမည့် Function
         window.openDeletePopup = function(id, siteName) {
             pendingDeleteId = id;
             pendingDeleteSite = siteName;
@@ -198,22 +249,18 @@
             document.getElementById('delete-popup').classList.remove('hidden');
         }
 
-        // Popup ပြန်ပိတ်ရန်
         window.closeDeletePopup = function() {
             document.getElementById('delete-popup').classList.add('hidden');
             pendingDeleteId = null;
             pendingDeleteSite = null;
         }
 
-        // 🗑️ သေချာပြီဆိုမှ အမှန်တကယ် ဖျက်မည့် Function
         window.executeDelete = async function() {
             const userInput = document.getElementById('delete-confirm-input').value.trim();
-            
             if (userInput !== pendingDeleteSite) {
-                alert("ရိုက်ထည့်လိုက်တဲ့ နာမည်မတူပါဘူး။ ကျေးဇူးပြု၍ မှန်ကန်အောင် ပြန်ရိုက်ထည့်ပါ။");
+                alert("ရိုက်ထည့်လိုက်တဲ့ နာမည်မတူပါဘူး။ ချက်ချင်း ပြန်ရိုက်ထည့်ပါ။");
                 return;
             }
-
             try {
                 await deleteDoc(doc(db, "passwords", pendingDeleteId));
                 closeDeletePopup();
