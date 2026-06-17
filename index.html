@@ -11,8 +11,8 @@
             background: linear-gradient(135deg, #FF4500 0%, #FF8C00 100%);
         }
         .zee-border-glow {
-            border: 1px solid rgba(255, 69, 0, 0.2);
-            box-shadow: 0 0 15px rgba(255, 69, 0, 0.05);
+            border: 1px solid rgba(255, 69, 0, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         .popup-overlay {
             background-color: rgba(5, 6, 9, 0.85);
@@ -20,48 +20,67 @@
         }
     </style>
 </head>
-<body class="bg-[#0b0c10] text-slate-200 font-sans p-4 min-h-screen flex flex-col justify-between relative">
+<body class="bg-[#0b0c10] text-slate-200 font-sans p-4 md:p-8 min-h-screen flex flex-col justify-between relative">
 
-    <div class="max-w-md mx-auto w-full bg-[#12141c] p-6 rounded-2xl shadow-2xl mt-6 border border-slate-800/80">
-        <div class="flex items-center justify-center space-x-2 mb-8">
-            <span class="text-2xl font-black tracking-wider text-white">ZEE <span class="text-orange-500">STUDIO</span></span>
+    <div id="success-alert" class="fixed top-5 left-1/2 -translate-x-1/2 bg-[#12141c] border-l-4 border-emerald-500 p-4 rounded-xl shadow-2xl flex items-center space-x-3 z-50 w-[90%] max-w-sm transition-all duration-300 transform opacity-0 translate-y-[-20px] pointer-events-none">
+        <div class="w-8 h-8 rounded-full bg-emerald-950/50 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-lg">✓</div>
+        <div>
+            <h5 class="text-sm font-bold text-white">အောင်မြင်ပါသည်။</h5>
+            <p class="text-xs text-slate-400">အကောင့်ထဲသို့ အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ။</p>
         </div>
+    </div>
 
-        <div id="auth-section" class="space-y-4">
-            <div class="text-center mb-4">
+    <div class="w-full max-w-6xl mx-auto flex-grow flex items-center justify-center my-4">
+        
+        <div id="auth-section" class="w-full max-w-md bg-[#12141c] p-6 md:p-8 rounded-2xl shadow-2xl border border-slate-800/80">
+            <div class="flex items-center justify-center space-x-2 mb-6">
+                <span class="text-2xl font-black tracking-wider text-white">ZEE <span class="text-orange-500">STUDIO</span></span>
+            </div>
+            <div class="text-center mb-6">
                 <p class="text-xs text-orange-400 font-bold tracking-widest uppercase">✨ Premium Secure Vault</p>
             </div>
-            <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
-            <input type="password" id="password" placeholder="Firebase Password" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
-            <button onclick="login()" class="w-full zee-gradient text-white p-3 rounded-xl font-bold cursor-pointer transition hover:opacity-90 shadow-lg shadow-orange-600/20 text-sm">Login to Vault</button>
+            <div class="space-y-4">
+                <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
+                <input type="password" id="password" placeholder="Password" class="w-full p-3 rounded-xl bg-[#1a1d29] border border-slate-700/60 focus:outline-none focus:border-orange-500 text-sm transition">
+                <button onclick="login()" class="w-full zee-gradient text-white p-3 rounded-xl font-bold cursor-pointer transition hover:opacity-90 shadow-lg shadow-orange-600/20 text-sm">Login to Vault</button>
+            </div>
         </div>
 
-        <div id="vault-section" class="hidden space-y-6">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="user-email" class="text-xs text-slate-400 font-mono"></span>
+        <div id="vault-section" class="hidden w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-[#12141c] p-5 rounded-2xl border border-slate-800/80 shadow-xl space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="user-email" class="text-xs text-slate-400 font-mono"></span>
+                        </div>
+                        <button onclick="logout()" class="text-xs bg-red-950/40 text-red-400 border border-red-900/50 hover:bg-red-900/30 px-3 py-1.5 rounded-lg transition">Logout</button>
+                    </div>
+
+                    <div class="bg-orange-950/10 p-3.5 rounded-xl border border-orange-500/20">
+                        <label class="text-[11px] text-orange-400 font-bold block mb-1 tracking-wider">SECRET MASTER KEY (စာဝှက်ရန်/ဖြေရန်):</label>
+                        <input type="password" id="master-key" placeholder="ဒီ Key ကို လုံးဝမမေ့ပါနဲ့" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500 font-mono text-orange-300">
+                    </div>
+
+                    <div class="space-y-3 pt-2">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Add New Entry</h3>
+                        <input type="text" id="site-name" placeholder="Website / App နာမည် (ဥပမာ- Facebook)" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
+                        <input type="text" id="site-username" placeholder="Username / Email" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
+                        <input type="password" id="site-password" placeholder="Password" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
+                        <button onclick="savePassword()" class="w-full zee-gradient text-white p-2.5 text-sm rounded-lg font-bold transition hover:opacity-90 cursor-pointer">Save Encrypted Data</button>
+                    </div>
                 </div>
-                <button onclick="logout()" class="text-xs bg-red-950/40 text-red-400 border border-red-900/50 hover:bg-red-900/30 px-3 py-1 rounded-lg transition">Logout</button>
             </div>
 
-            <div class="bg-orange-950/20 p-3 rounded-xl border border-orange-500/20">
-                <label class="text-[11px] text-orange-400 font-bold block mb-1 tracking-wider">SECRET MASTER KEY (စာဝှက်ရန်/ဖြေရန်):</label>
-                <input type="password" id="master-key" placeholder="ဒီ Key ကို လုံးဝမမေ့ပါနဲ့" class="w-full p-2 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500 font-mono text-orange-300">
+            <div class="lg:col-span-7 bg-[#12141c] p-5 rounded-2xl border border-slate-800/80 shadow-xl min-h-[300px]">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                    <h3 class="text-sm font-bold text-orange-400 tracking-wider uppercase">Your Vault Entries</h3>
+                    <div class="text-[11px] text-slate-500">ZEE STUDIO Cloud Encryption</div>
+                </div>
+                <div id="password-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
             </div>
 
-            <div class="space-y-3 bg-[#161924] p-4 rounded-xl border border-slate-800/60">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Add New Entry</h3>
-                <input type="text" id="site-name" placeholder="Website / App နာမည် (ဥပမာ- Facebook)" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
-                <input type="text" id="site-username" placeholder="Username / Email" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
-                <input type="password" id="site-password" placeholder="Password" class="w-full p-2.5 text-sm rounded-lg bg-[#1a1d29] border border-slate-700/50 focus:outline-none focus:border-orange-500">
-                <button onclick="savePassword()" class="w-full zee-gradient text-white p-2.5 text-sm rounded-lg font-bold transition hover:opacity-90 cursor-pointer">Save Encrypted Data</button>
-            </div>
-
-            <div>
-                <h3 class="text-sm font-bold mb-3 text-orange-400 tracking-wider uppercase">Your Vault Entries</h3>
-                <div id="password-list" class="space-y-3"></div>
-            </div>
         </div>
     </div>
 
@@ -82,7 +101,7 @@
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-slate-600 mt-8 mb-2">
+    <div class="text-center text-[11px] text-slate-600 mt-6 mb-2">
         &copy; 2026 ZEE STUDIO. All Rights Reserved.
     </div>
 
@@ -109,6 +128,7 @@
         let currentUser = null;
         let pendingDeleteId = null;
         let pendingDeleteSite = null;
+        let hasJustLoggedIn = false; // Login ဝင်ခါစလား သိနိုင်ရန် Flag
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -116,6 +136,13 @@
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('vault-section').classList.remove('hidden');
                 document.getElementById('user-email').innerText = user.email;
+                
+                // ဝင်ခါစဆိုလျှင် Box လေး ပြပေးရန်
+                if (hasJustLoggedIn) {
+                    showSuccessAlert();
+                    hasJustLoggedIn = false;
+                }
+                
                 loadPasswords();
             } else {
                 currentUser = null;
@@ -124,10 +151,28 @@
             }
         });
 
+        // Login Function
         window.login = function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, password).catch(err => alert("Login မှားနေပါတယ်: " + err.message));
+            hasJustLoggedIn = true; // Login ခလုတ်နှိပ်လိုက်သဖြင့် Flag ပေးလိုက်ခြင်း
+            signInWithEmailAndPassword(auth, email, password).catch(err => {
+                hasJustLoggedIn = false;
+                alert("Login မှားနေပါတယ်: " + err.message);
+            });
+        }
+
+        // 🔔 Success Alert Box ပြသပေးမည့် Function
+        function showSuccessAlert() {
+            const alertBox = document.getElementById('success-alert');
+            alertBox.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+            alertBox.classList.add('opacity-100', 'translate-y-0');
+            
+            // ၃ စက္ကန့်ပြည့်လျှင် အလိုအလျောက် ပြန်ပျောက်သွားစေရန်
+            setTimeout(() => {
+                alertBox.classList.remove('opacity-100', 'translate-y-0');
+                alertBox.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+            }, 3000);
         }
 
         window.logout = function() {
@@ -172,13 +217,15 @@
                     const docId = snapshotDoc.id;
                     
                     const itemHTML = `
-                        <div class="p-3 bg-[#161924] border border-slate-800/80 rounded-xl space-y-1 zee-border-glow">
-                            <div class="flex justify-between items-start">
-                                <div class="font-bold text-orange-400 text-sm">${data.site}</div>
-                                <button onclick="openDeletePopup('${docId}', '${data.site}')" class="text-xs text-red-500/70 hover:text-red-400 cursor-pointer p-1 transition">ဖျက်ရန်</button>
+                        <div class="p-3 bg-[#161924] border border-slate-800/80 rounded-xl space-y-1 zee-border-glow flex flex-col justify-between h-auto">
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <div class="font-bold text-orange-400 text-sm truncate pr-2">${data.site}</div>
+                                    <button onclick="openDeletePopup('${docId}', '${data.site}')" class="text-xs text-red-500/70 hover:text-red-400 cursor-pointer p-1 transition whitespace-nowrap">ဖျက်ရန်</button>
+                                </div>
+                                <div class="text-xs text-slate-400 truncate mt-0.5">User: ${data.username}</div>
                             </div>
-                            <div class="text-xs text-slate-400">User: ${data.username}</div>
-                            <div class="flex items-center space-x-2 mt-1 bg-[#10121a] p-1.5 rounded-lg border border-slate-800">
+                            <div class="flex items-center space-x-2 mt-2 bg-[#10121a] p-1.5 rounded-lg border border-slate-800">
                                 <input type="password" value="${data.password}" id="p-${docId}" readonly class="bg-transparent text-xs text-slate-500 w-full focus:outline-none font-mono tracking-wide">
                                 <button onclick="decryptField('${docId}', '${data.password}')" class="text-xs text-orange-500 font-bold hover:underline cursor-pointer whitespace-nowrap px-1">ပြရန်</button>
                             </div>
@@ -189,7 +236,6 @@
             });
         }
 
-        // 🎨 Popup အလှလေးကို ဖွင့်ပေးမည့် Function
         window.openDeletePopup = function(id, siteName) {
             pendingDeleteId = id;
             pendingDeleteSite = siteName;
@@ -198,22 +244,18 @@
             document.getElementById('delete-popup').classList.remove('hidden');
         }
 
-        // Popup ပြန်ပိတ်ရန်
         window.closeDeletePopup = function() {
             document.getElementById('delete-popup').classList.add('hidden');
             pendingDeleteId = null;
             pendingDeleteSite = null;
         }
 
-        // 🗑️ သေချာပြီဆိုမှ အမှန်တကယ် ဖျက်မည့် Function
         window.executeDelete = async function() {
             const userInput = document.getElementById('delete-confirm-input').value.trim();
-            
             if (userInput !== pendingDeleteSite) {
                 alert("ရိုက်ထည့်လိုက်တဲ့ နာမည်မတူပါဘူး။ ကျေးဇူးပြု၍ မှန်ကန်အောင် ပြန်ရိုက်ထည့်ပါ။");
                 return;
             }
-
             try {
                 await deleteDoc(doc(db, "passwords", pendingDeleteId));
                 closeDeletePopup();
